@@ -1,9 +1,10 @@
 
 import 'package:flutter/material.dart';
+
 import '../models/bus.dart';
 import 'seat_selection_screen.dart';
 
-class SearchResultsScreen extends StatelessWidget {
+class SearchResultsScreen extends StatefulWidget {
   final String from;
   final String to;
   final DateTime journeyDate;
@@ -18,230 +19,580 @@ class SearchResultsScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final matchingBuses = buses.where((bus) {
-      return bus.from.toLowerCase() == from.toLowerCase() &&
-          bus.to.toLowerCase() == to.toLowerCase();
+  State<SearchResultsScreen> createState() =>
+      _SearchResultsScreenState();
+}
+
+class _SearchResultsScreenState extends State<SearchResultsScreen> {
+  String selectedType = 'All';
+  String sortBy = 'Recommended';
+  bool acOnly = false;
+  bool sleeperOnly = false;
+
+  List<Bus> get filteredBuses {
+    final results = widget.buses.where((bus) {
+      final routeMatches =
+          bus.from.toLowerCase().trim() ==
+                  widget.from.toLowerCase().trim() &&
+              bus.to.toLowerCase().trim() ==
+                  widget.to.toLowerCase().trim();
+
+      final typeMatches = selectedType == 'All' ||
+          (selectedType == 'AC'
+              ? bus.busType.toLowerCase().contains('ac')
+              : !bus.busType.toLowerCase().contains('ac'));
+
+      final acMatches = !acOnly ||
+          bus.busType.toLowerCase().contains('ac');
+
+      final sleeperMatches = !sleeperOnly ||
+          bus.busType.toLowerCase().contains('sleeper');
+
+      return routeMatches &&
+          typeMatches &&
+          acMatches &&
+          sleeperMatches;
     }).toList();
 
+    switch (sortBy) {
+      case 'Lowest Price':
+        results.sort((a, b) => a.price.compareTo(b.price));
+        break;
+      case 'Earliest Departure':
+        results.sort((a, b) =>
+            _timeToMinutes(a.departure).compareTo(
+              _timeToMinutes(b.departure),
+            ));
+        break;
+      case 'Most Seats':
+        results.sort((a, b) =>
+            b.availableSeats.compareTo(a.availableSeats));
+        break;
+    }
+
+    return results;
+  }
+
+  int _timeToMinutes(String time) {
+    final match = RegExp(
+      r'(\d{1,2}):(\d{2})\s*(AM|PM)',
+      caseSensitive: false,
+    ).firstMatch(time.trim());
+
+    if (match == null) return 0;
+
+    int hour = int.parse(match.group(1)!);
+    final minute = int.parse(match.group(2)!);
+    final period = match.group(3)!.toUpperCase();
+
+    hour %= 12;
+    if (period == 'PM') hour += 12;
+
+    return hour * 60 + minute;
+  }
+
+  String get formattedDate {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+
+    return '${widget.journeyDate.day} '
+        '${months[widget.journeyDate.month - 1]} '
+        '${widget.journeyDate.year}';
+  }
+
+  void _resetFilters() {
+    setState(() {
+      selectedType = 'All';
+      sortBy = 'Recommended';
+      acOnly = false;
+      sleeperOnly = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final buses = filteredBuses;
+
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FB),
       appBar: AppBar(
-        title: const Text('Available Buses'),
+        title: const Text(
+          'Available Buses',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: const Color(0xFF155EEF),
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      body: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEAF0FF),
-              borderRadius: BorderRadius.circular(16),
+            width: double.infinity,
+            padding: const EdgeInsets.all(18),
+            decoration: const BoxDecoration(
+              color: Color(0xFF155EEF),
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(22),
+              ),
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(
-                  Icons.route,
-                  color: Color(0xFF155EEF),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    '$from → $to\n'
-                    '${journeyDate.day}/${journeyDate.month}/${journeyDate.year}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.location_on_outlined,
+                      color: Colors.white,
                     ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '${widget.from} → ${widget.to}',
+                        style: const TextStyle(
+                          fontSize: 19,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  formattedDate,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  '${buses.length} buses found',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 20),
-          Text(
-            '${matchingBuses.length} buses found',
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 12),
-          if (matchingBuses.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.directions_bus_outlined,
-                    size: 60,
-                    color: Colors.grey,
-                  ),
-                  SizedBox(height: 12),
-                  Text(
-                    'No buses found for this route.',
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 6),
-                  Text(
-                    'Try Hyderabad to Bengaluru or Hyderabad to Chennai.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
-            )
-          else
-            ...matchingBuses.map(
-              (bus) => Card(
-                color: Colors.white,
-                elevation: 1,
-                margin: const EdgeInsets.only(bottom: 14),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.filter_list,
+                      color: Color(0xFF155EEF),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Filters',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: _resetFilters,
+                      child: const Text('Reset'),
+                    ),
+                  ],
+                ),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
                     children: [
-                      Row(
-                        children: [
-                          const CircleAvatar(
-                            backgroundColor: Color(0xFFEAF0FF),
-                            child: Icon(
-                              Icons.directions_bus,
-                              color: Color(0xFF155EEF),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  bus.operatorName,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  bus.busType,
-                                  style: const TextStyle(
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            '₹${bus.price.toStringAsFixed(0)}',
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Divider(height: 28),
-                      Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
-                        children: [
-                          _TimeInfo(
-                            label: 'Departure',
-                            time: bus.departure,
-                          ),
-                          Column(
-                            children: [
-                              Text(
-                                bus.duration,
-                                style: const TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              const Icon(
-                                Icons.arrow_forward,
-                                color: Color(0xFF155EEF),
-                              ),
-                            ],
-                          ),
-                          _TimeInfo(
-                            label: 'Arrival',
-                            time: bus.arrival,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              '${bus.availableSeats} seats available',
-                              style: const TextStyle(
-                                color: Colors.green,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                          FilledButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      SeatSelectionScreen(
-                                    bus: bus,
-                                    from: from,
-                                    to: to,
-                                    journeyDate: journeyDate,
-                                  ),
-                                ),
-                              );
-                            },
-                            child: const Text('Select Seats'),
-                          ),
-                        ],
-                      ),
+                      _filterChip('All', selectedType,
+                          (value) => setState(
+                              () => selectedType = value)),
+                      const SizedBox(width: 8),
+                      _filterChip('AC', selectedType,
+                          (value) => setState(
+                              () => selectedType = value)),
+                      const SizedBox(width: 8),
+                      _filterChip('Non-AC', selectedType,
+                          (value) => setState(
+                              () => selectedType = value)),
                     ],
                   ),
                 ),
-              ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        title: const Text(
+                          'AC only',
+                          style: TextStyle(fontSize: 13),
+                        ),
+                        value: acOnly,
+                        onChanged: (value) => setState(
+                          () => acOnly = value ?? false,
+                        ),
+                        controlAffinity:
+                            ListTileControlAffinity.leading,
+                      ),
+                    ),
+                    Expanded(
+                      child: CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                        title: const Text(
+                          'Sleeper only',
+                          style: TextStyle(fontSize: 13),
+                        ),
+                        value: sleeperOnly,
+                        onChanged: (value) => setState(
+                          () => sleeperOnly = value ?? false,
+                        ),
+                        controlAffinity:
+                            ListTileControlAffinity.leading,
+                      ),
+                    ),
+                  ],
+                ),
+                DropdownButtonFormField<String>(
+                  value: sortBy,
+                  decoration: InputDecoration(
+                    labelText: 'Sort buses',
+                    prefixIcon:
+                        const Icon(Icons.sort, size: 20),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'Recommended',
+                      child: Text('Recommended'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Lowest Price',
+                      child: Text('Lowest Price'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Earliest Departure',
+                      child: Text('Earliest Departure'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Most Seats',
+                      child: Text('Most Available Seats'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => sortBy = value);
+                    }
+                  },
+                ),
+              ],
             ),
+          ),
+          Expanded(
+            child: buses.isEmpty
+                ? _emptyState()
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: buses.length,
+                    itemBuilder: (context, index) {
+                      return _busCard(buses[index], index);
+                    },
+                  ),
+          ),
         ],
       ),
     );
   }
-}
 
-class _TimeInfo extends StatelessWidget {
-  final String label;
-  final String time;
+  Widget _filterChip(
+    String label,
+    String selected,
+    ValueChanged<String> onSelected,
+  ) {
+    final active = label == selected;
 
-  const _TimeInfo({
-    required this.label,
-    required this.time,
-  });
+    return ChoiceChip(
+      label: Text(label),
+      selected: active,
+      onSelected: (_) => onSelected(label),
+      selectedColor: const Color(0xFFDCE7FF),
+      labelStyle: TextStyle(
+        color: active
+            ? const Color(0xFF155EEF)
+            : Colors.black87,
+        fontWeight: FontWeight.w600,
+      ),
+      side: BorderSide(
+        color: active
+            ? const Color(0xFF155EEF)
+            : Colors.black12,
+      ),
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.black54,
-            fontSize: 11,
+  Widget _busCard(Bus bus, int index) {
+    return TweenAnimationBuilder<double>(
+      key: ValueKey(bus.id),
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 300 + index * 100),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 18 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 14),
+        elevation: 1,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8EEFF),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.directions_bus_filled,
+                      color: Color(0xFF155EEF),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          bus.operatorName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          bus.busType,
+                          style: const TextStyle(
+                            color: Colors.blueGrey,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '₹${bus.price}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 21,
+                          color: Color(0xFF155EEF),
+                        ),
+                      ),
+                      const Text(
+                        'per seat',
+                        style: TextStyle(
+                          color: Colors.blueGrey,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Divider(height: 1),
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: _timeInfo(
+                      bus.departure,
+                      'Departure',
+                      Icons.trip_origin,
+                    ),
+                  ),
+                  Column(
+                    children: [
+                      const Icon(
+                        Icons.arrow_forward,
+                        color: Colors.blueGrey,
+                        size: 20,
+                      ),
+                      Text(
+                        bus.duration,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.blueGrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Expanded(
+                    child: _timeInfo(
+                      bus.arrival,
+                      'Arrival',
+                      Icons.location_on_outlined,
+                      alignEnd: true,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.event_seat_outlined,
+                    size: 17,
+                    color: Colors.teal,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    '${bus.availableSeats} seats available',
+                    style: const TextStyle(
+                      color: Colors.teal,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const Spacer(),
+                  FilledButton(
+                    onPressed: bus.availableSeats <= 0
+                        ? null
+                        : () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    SeatSelectionScreen(
+                                  bus: bus,
+                                  from: widget.from,
+                                  to: widget.to,
+                                  journeyDate:
+                                      widget.journeyDate,
+                                ),
+                              ),
+                            );
+                          },
+                    style: FilledButton.styleFrom(
+                      backgroundColor:
+                          const Color(0xFF155EEF),
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Select Seats'),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 4),
+      ),
+    );
+  }
+
+  Widget _timeInfo(
+    String time,
+    String label,
+    IconData icon, {
+    bool alignEnd = false,
+  }) {
+    return Column(
+      crossAxisAlignment: alignEnd
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
+      children: [
         Text(
           time,
           style: const TextStyle(
+            fontSize: 17,
             fontWeight: FontWeight.bold,
-            fontSize: 15,
           ),
         ),
+        const SizedBox(height: 5),
+        Row(
+          mainAxisAlignment: alignEnd
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.start,
+          children: [
+            Icon(icon, size: 13, color: Colors.blueGrey),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11,
+                color: Colors.blueGrey,
+              ),
+            ),
+          ],
+        ),
       ],
+    );
+  }
+
+  Widget _emptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.directions_bus_outlined,
+              size: 76,
+              color: Colors.blueGrey,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'No buses found',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Try changing your filters or selecting '
+              'another route.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.blueGrey),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: _resetFilters,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Reset filters'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
