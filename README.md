@@ -1,17 +1,54 @@
-# project
+# BusGo - Modern Flutter Bus Booking Application
 
-A new Flutter project.
+BusGo is a production-ready, feature-packed Flutter bus reservation and ticketing application with an intuitive UI and smooth user experience.
 
-## Getting Started
+## ✨ Features
 
-This project is a starting point for a Flutter application.
+- **Route Search**: Fast origin and destination search with popular travel routes and swapping capability.
+- **Date Selector**: Quick calendar selector with shortcuts for today and tomorrow.
+- **Dynamic Bus Listings**: Comprehensive filter & sorting by price, departure times, ratings, and bus types (AC/Non-AC, Sleeper/Seater).
+- **Interactive Seat Selection**: Visual seat matrix with lower and upper deck sleeper/seater toggles, real-time total price calculation, and gender-specific seating.
+- **Passenger Details & Form Validation**: Multi-passenger form validation with contact details.
+- **Coupons & Promo Engine**: Instant discount coupons and promo codes calculation.
+- **Mock Payment Gateway**: Support for UPI, Credit/Debit cards, and Net Banking checkout.
+- **E-Tickets & Booking History**: PNR generation, digital ticket view, and ticket cancellation management.
+- **Unit & Widget Testing**: Comprehensive suite of tests for bus services and formatters.
 
-A few resources to get you started if this is your first Flutter project:
+## 🚀 Getting Started
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+### Prerequisites
+- Flutter SDK (>=3.3.0 <4.0.0)
+- Dart SDK (>=3.3.0 <4.0.0)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Installation
+
+```bash
+git clone https://github.com/srivardhan29906-hub/bus-booking-app.git
+cd bus-booking-app
+flutter pub get
+flutter run
+```
+
+### Running Tests
+
+```bash
+flutter test
+```
+
+## 🛠️ Architecture
+
+```
+lib/
+├── core/
+│   ├── constants/
+│   └── theme/
+├── data/
+├── models/
+├── screens/
+├── services/
+├── utils/
+└── widgets/
+```
+
+## 📄 License
+This project is licensed under the MIT License.
