@@ -1,4 +1,3 @@
-
 class Bus {
   final String id;
   final String operatorName;
@@ -10,6 +9,9 @@ class Bus {
   final int availableSeats;
   final String from;
   final String to;
+  final double rating;
+  final int totalReviews;
+  final List<String> amenities;
 
   const Bus({
     required this.id,
@@ -22,5 +24,8 @@ class Bus {
     required this.availableSeats,
     required this.from,
     required this.to,
+    this.rating = 4.5,
+    this.totalReviews = 120,
+    this.amenities = const ['WiFi', 'Charging Point', 'AC', 'Water Bottle'],
   });
 }
