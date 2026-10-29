@@ -1,4 +1,3 @@
-
 class Booking {
   final String id;
   final String passengerName;
@@ -11,6 +10,7 @@ class Booking {
   final List<int> seatNumbers;
   final double totalAmount;
   final String status;
+  final String pnrNumber;
 
   const Booking({
     required this.id,
@@ -24,5 +24,6 @@ class Booking {
     required this.seatNumbers,
     required this.totalAmount,
     this.status = 'Confirmed',
+    this.pnrNumber = 'BG-992834',
   });
 }
