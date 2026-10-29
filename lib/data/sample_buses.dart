@@ -1,0 +1,53 @@
+
+import '../models/bus.dart';
+
+const List<Bus> sampleBuses = [
+  Bus(
+    id: 'BUS001',
+    operatorName: 'Orange Travels',
+    busType: 'AC Sleeper',
+    departure: '09:30 PM',
+    arrival: '06:00 AM',
+    duration: '8h 30m',
+    price: 899,
+    availableSeats: 18,
+    from: 'Hyderabad',
+    to: 'Bengaluru',
+  ),
+  Bus(
+    id: 'BUS002',
+    operatorName: 'Sri Krishna Travels',
+    busType: 'AC Seater',
+    departure: '10:15 PM',
+    arrival: '06:45 AM',
+    duration: '8h 30m',
+    price: 699,
+    availableSeats: 24,
+    from: 'Hyderabad',
+    to: 'Bengaluru',
+  ),
+  Bus(
+    id: 'BUS003',
+    operatorName: 'Morning Star Travels',
+    busType: 'Non-AC Sleeper',
+    departure: '08:00 PM',
+    arrival: '05:30 AM',
+    duration: '9h 30m',
+    price: 599,
+    availableSeats: 12,
+    from: 'Hyderabad',
+    to: 'Chennai',
+  ),
+  Bus(
+    id: 'BUS004',
+    operatorName: 'VRL Travels',
+    busType: 'AC Sleeper',
+    departure: '09:00 PM',
+    arrival: '07:00 AM',
+    duration: '10h',
+    price: 999,
+    availableSeats: 16,
+    from: 'Bengaluru',
+    to: 'Chennai',
+  ),
+];
