@@ -40,7 +40,15 @@ The sections below follow the experiment titles in **UI Design – Flutter Lab M
 - `lib/screens/search_results_screen.dart` — Column, Row, filter controls and bus result layout.
 - `lib/widgets/bus_card.dart` — reusable Card, Row and Column layout.
 
-**Screenshot to capture:** Existing BusGo home/trip-search screen and existing available-buses screen. Do not add a separate demo screen.
+**Code-based UI previews:**
+
+![BusGo home and trip search](screenshots/experiment-2-home.svg)
+
+*Figure 2.1: Home screen and trip search form, based on `lib/screens/home_screen.dart`.*
+
+![Available buses and filters](screenshots/experiment-2-results.svg)
+
+*Figure 2.2: Available bus cards, filters and sorting, based on `lib/screens/search_results_screen.dart` and `lib/widgets/bus_card.dart`.*
 
 ### Experiment 3 — Design a Responsive User Interface Using MediaQuery and LayoutBuilder
 
@@ -58,7 +66,11 @@ The sections below follow the experiment titles in **UI Design – Flutter Lab M
 
 **Note:** `lib/core/constants/app_routes.dart` defines route-name constants, but `lib/main.dart` does not register a `routes` map or use `initialRoute`; named-route navigation is therefore not demonstrated by the app entry point.
 
-**Screenshot to capture:** Existing app screens showing the trip-search → available-buses → seat-selection flow.
+**Code-based navigation flow preview:**
+
+![BusGo navigation flow](screenshots/experiment-4-navigation.svg)
+
+*Figure 4.1: Screen sequence represented by the app's Navigator calls. This is a flow illustration, not a runtime capture.*
 
 ### Experiment 5 — Understanding Stateful and Stateless Widgets and Implementing State Management using setState() and Provider
 
@@ -70,7 +82,11 @@ The sections below follow the experiment titles in **UI Design – Flutter Lab M
 
 **Status:** Stateful/Stateless widgets and local `setState()` are demonstrated. Provider/ChangeNotifier is not declared in `pubspec.yaml` and is not demonstrated by the current project.
 
-**Screenshot to capture:** Existing seat-selection screen showing selected seats and the fare update.
+**Code-based UI preview:**
+
+![Seat selection](screenshots/experiment-5-seat-selection.svg)
+
+*Figure 5.1: Seat grid, booked/selected seat states and calculated fare, based on `lib/screens/seat_selection_screen.dart`. Illustrative preview, not a device capture.*
 
 ### Experiment 6 — Creating Custom Widgets and Applying Themes and Custom Styles in Flutter
 
@@ -81,7 +97,11 @@ The sections below follow the experiment titles in **UI Design – Flutter Lab M
 - `lib/widgets/custom_text_field.dart` — reusable text field.
 - Other reusable widgets include `BusCard`, `AmenityChip`, `RatingBadge`, `CouponCard` and `EmptyState`.
 
-**Screenshot to capture:** Existing BusGo screen displaying the current theme and reusable UI components. No separate theme-demo screen is added.
+**Code-based UI preview:**
+
+![Theme and reusable widgets](screenshots/experiment-6-theme-widgets.svg)
+
+*Figure 6.1: Theme colors and reusable widget examples, based on `lib/core/theme/app_theme.dart` and `lib/widgets/`.*
 
 ### Experiment 7 — Designing Forms with Various Input Fields and Implementing Form Validation and Error Handling
 
@@ -90,7 +110,11 @@ The sections below follow the experiment titles in **UI Design – Flutter Lab M
 - `lib/utils/validators.dart` — name, phone, email and age validation helpers.
 - `lib/widgets/custom_text_field.dart` — reusable TextFormField with validator support.
 
-**Screenshot to capture:** Existing Passenger Details screen, including a genuine validation-error state produced by submitting invalid/empty input.
+**Code-based UI preview:**
+
+![Passenger form validation](screenshots/experiment-7-passenger-form.svg)
+
+*Figure 7.1: Passenger form and representative validation messages, based on `lib/screens/passenger_details_screen.dart`. The displayed errors illustrate validator output; they are not a captured test run.*
 
 ### Experiment 8 — Implementing UI Animations Using Flutter Animation Framework and Experimenting with Fade and Slide Animations
 
@@ -113,7 +137,7 @@ The sections below follow the experiment titles in **UI Design – Flutter Lab M
 
 **Review finding:** The current widget test imports `main.dart` and calls `MyApp`, but the application class in `lib/main.dart` is `BusBookingApp`. The generated test also expects a counter and plus button that are not part of the BusGo app. This test does not currently test the BusGo UI and is expected to fail until it is rewritten for the actual app.
 
-**Screenshot to capture:** Run `flutter test` locally and capture the real terminal output. Do not present an assumed passing result.
+**Screenshot:** No test-result screenshot is included because a real `flutter test` run has not been captured. Run `flutter test` locally and add the actual terminal output here after verification.
 
 ## Project structure
 
@@ -150,4 +174,4 @@ Test execution has not been performed as part of this README review. Use the com
 
 ## Screenshot policy
 
-Only genuine screenshots captured from this BusGo project should be placed in the experiment sections above. The repository currently contains app launcher/branding images, but no genuine in-app screen captures. Screenshots have therefore not been fabricated or substituted with screenshots from unrelated sample apps.
+Only genuine screenshots captured from this BusGo project should be placed in the experiment sections above. The `screenshots/` folder contains clearly labelled **code-based UI previews** generated from the current Flutter widget structure. They help readers understand the intended layout, but they are not genuine emulator/device captures and must not be treated as runtime or test evidence. Experiments 1, 3, 8, 9 and 10 do not have screenshots because the required environment evidence or implemented feature/test output is not available in the repository.
